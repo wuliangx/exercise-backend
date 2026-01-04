@@ -134,11 +134,13 @@ Authorization: Bearer <token>
 
 ## Database
 
-The application uses H2 in-memory database by default. You can access the H2 console at:
+The application uses H2 file-based persistent database. Data is stored in the `data/` folder. You can access the H2 console at:
 - URL: `http://localhost:8080/h2-console`
-- JDBC URL: `jdbc:h2:mem:testdb`
+- JDBC URL: `jdbc:h2:file:./data/exercise-db`
 - Username: `sa`
 - Password: (empty)
+
+**Note:** The database files (`*.mv.db`, `*.trace.db`) are stored in the `data/` folder and persist between application restarts.
 
 ## Security
 

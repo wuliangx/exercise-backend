@@ -53,4 +53,7 @@ application-local.properties
 *.db
 *.mv.db
 *.trace.db
+data/
 
+/.apt_generated/
+/.apt_generated_tests/
