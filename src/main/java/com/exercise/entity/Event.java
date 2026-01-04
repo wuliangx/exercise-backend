@@ -35,6 +35,10 @@ public class Event {
     @Column(nullable = false)
     private Integer maxParticipants;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "meetup_group_id", nullable = false)
+    private MeetupGroup meetupGroup;
+
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<EventRegistration> registrations = new HashSet<>();
 }

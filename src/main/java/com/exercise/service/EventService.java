@@ -1,19 +1,22 @@
 package com.exercise.service;
 
-import com.exercise.dto.CreateEventRequest;
-import com.exercise.dto.EventDto;
-import com.exercise.entity.Event;
-import com.exercise.entity.EventRegistration;
-import com.exercise.entity.User;
-import com.exercise.repository.EventRegistrationRepository;
-import com.exercise.repository.EventRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.exercise.dto.CreateEventRequest;
+import com.exercise.dto.EventDto;
+import com.exercise.entity.Event;
+import com.exercise.entity.EventRegistration;
+import com.exercise.entity.MeetupGroup;
+import com.exercise.entity.User;
+import com.exercise.repository.EventRegistrationRepository;
+import com.exercise.repository.EventRepository;
+import com.exercise.repository.MeetupGroupRepository;
 
 @Service
 public class EventService {
@@ -26,6 +29,9 @@ public class EventService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private MeetupGroupRepository meetupGroupRepository;
 
     public List<EventDto> getAllEvents(Long userId) {
         List<Event> events = eventRepository.findAll();
@@ -43,12 +49,16 @@ public class EventService {
 
     @Transactional
     public EventDto createEvent(CreateEventRequest request) {
+        MeetupGroup meetupGroup = meetupGroupRepository.findById(request.getMeetupGroupId())
+                .orElseThrow(() -> new RuntimeException("Meetup group not found"));
+
         Event event = new Event();
         event.setTitle(request.getTitle());
         event.setDescription(request.getDescription());
         event.setEventDate(request.getEventDate());
         event.setLocation(request.getLocation());
         event.setMaxParticipants(request.getMaxParticipants());
+        event.setMeetupGroup(meetupGroup);
 
         event = eventRepository.save(event);
         return convertToDto(event, null);
@@ -89,7 +99,7 @@ public class EventService {
         registrationRepository.delete(registration);
     }
 
-    private EventDto convertToDto(Event event, Long userId) {
+    public EventDto convertToDto(Event event, Long userId) {
         EventDto dto = new EventDto();
         dto.setId(event.getId());
         dto.setTitle(event.getTitle());
@@ -98,6 +108,11 @@ public class EventService {
         dto.setLocation(event.getLocation());
         dto.setMaxParticipants(event.getMaxParticipants());
         dto.setCurrentParticipants((int) registrationRepository.countByEventId(event.getId()));
+
+        if (event.getMeetupGroup() != null) {
+            dto.setMeetupGroupId(event.getMeetupGroup().getId());
+            dto.setMeetupGroupName(event.getMeetupGroup().getName());
+        }
 
         if (userId != null) {
             dto.setIsRegistered(registrationRepository.existsByUserIdAndEventId(userId, event.getId()));

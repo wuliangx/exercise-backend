@@ -5,10 +5,11 @@ A Spring Boot REST API backend for managing events with user authentication and 
 ## Features
 
 - User registration and login with JWT authentication
+- Create and manage meetup groups
 - List all available events
 - List events that a user is registered for
 - Register/unregister for events
-- Create new events
+- Create new events (associated with meetup groups)
 
 ## Technology Stack
 
@@ -103,7 +104,9 @@ Authorization: Bearer <token>
       "location": "Conference Hall A",
       "maxParticipants": 50,
       "currentParticipants": 10,
-      "isRegistered": true
+      "isRegistered": true,
+      "meetupGroupId": 1,
+      "meetupGroupName": "Tech Meetup Group"
     }
   ]
   ```
@@ -121,9 +124,11 @@ Authorization: Bearer <token>
     "description": "Event description",
     "eventDate": "2024-12-25T10:00:00",
     "location": "Location",
-    "maxParticipants": 100
+    "maxParticipants": 100,
+    "meetupGroupId": 1
   }
   ```
+- **Response:** Event DTO with meetup group information
 
 #### Register for Event
 - **POST** `/api/events/{eventId}/register`
@@ -131,6 +136,79 @@ Authorization: Bearer <token>
 
 #### Unregister from Event
 - **DELETE** `/api/events/{eventId}/register`
+- **Response:** 200 OK (empty body)
+
+### Meetup Groups
+
+All meetup group endpoints require authentication. Include the JWT token in the Authorization header:
+```
+Authorization: Bearer <token>
+```
+
+#### Get All Meetup Groups
+- **GET** `/api/meetup-groups`
+- **Response:**
+  ```json
+  [
+    {
+      "id": 1,
+      "name": "Tech Meetup Group",
+      "description": "A group for tech enthusiasts",
+      "events": [
+        {
+          "id": 1,
+          "title": "Spring Boot Workshop",
+          "description": "Learn Spring Boot",
+          "eventDate": "2024-12-25T10:00:00",
+          "location": "Conference Hall A",
+          "maxParticipants": 50,
+          "currentParticipants": 10,
+          "isRegistered": true,
+          "meetupGroupId": 1,
+          "meetupGroupName": "Tech Meetup Group"
+        }
+      ]
+    }
+  ]
+  ```
+
+#### Get Meetup Group by ID
+- **GET** `/api/meetup-groups/{id}`
+- **Response:**
+  ```json
+  {
+    "id": 1,
+    "name": "Tech Meetup Group",
+    "description": "A group for tech enthusiasts",
+    "events": [
+      {
+        "id": 1,
+        "title": "Spring Boot Workshop",
+        "description": "Learn Spring Boot",
+        "eventDate": "2024-12-25T10:00:00",
+        "location": "Conference Hall A",
+        "maxParticipants": 50,
+        "currentParticipants": 10,
+        "isRegistered": true,
+        "meetupGroupId": 1,
+        "meetupGroupName": "Tech Meetup Group"
+      }
+    ]
+  }
+  ```
+- **Error Response:** 404 NOT FOUND if group doesn't exist
+
+#### Create Meetup Group
+- **POST** `/api/meetup-groups`
+- **Request Body:**
+  ```json
+  {
+    "name": "Tech Meetup Group",
+    "description": "A group for tech enthusiasts"
+  }
+  ```
+- **Response:** Meetup Group DTO with events list
+- **Note:** `name` is required, `description` is optional
 
 ## Database
 
@@ -187,5 +265,43 @@ curl -X GET http://localhost:8080/api/events/my-events \
 ```bash
 curl -X POST http://localhost:8080/api/events/1/register \
   -H "Authorization: Bearer <your-token>"
+```
+
+### 6. Create a meetup group
+```bash
+curl -X POST http://localhost:8080/api/meetup-groups \
+  -H "Authorization: Bearer <your-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Tech Meetup Group",
+    "description": "A group for tech enthusiasts"
+  }'
+```
+
+### 7. Get all meetup groups
+```bash
+curl -X GET http://localhost:8080/api/meetup-groups \
+  -H "Authorization: Bearer <your-token>"
+```
+
+### 8. Get meetup group by ID
+```bash
+curl -X GET http://localhost:8080/api/meetup-groups/1 \
+  -H "Authorization: Bearer <your-token>"
+```
+
+### 9. Create an event (with meetup group)
+```bash
+curl -X POST http://localhost:8080/api/events \
+  -H "Authorization: Bearer <your-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Spring Boot Workshop",
+    "description": "Learn Spring Boot",
+    "eventDate": "2024-12-25T10:00:00",
+    "location": "Conference Hall A",
+    "maxParticipants": 50,
+    "meetupGroupId": 1
+  }'
 ```
 

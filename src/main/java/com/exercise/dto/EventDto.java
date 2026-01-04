@@ -18,5 +18,7 @@ public class EventDto {
     private Integer maxParticipants;
     private Integer currentParticipants;
     private Boolean isRegistered;
+    private Long meetupGroupId;
+    private String meetupGroupName;
 }
 

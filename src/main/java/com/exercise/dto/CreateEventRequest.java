@@ -25,5 +25,8 @@ public class CreateEventRequest {
     @NotNull(message = "Max participants is required")
     @Positive(message = "Max participants must be positive")
     private Integer maxParticipants;
+
+    @NotNull(message = "Meetup group ID is required")
+    private Long meetupGroupId;
 }
 
